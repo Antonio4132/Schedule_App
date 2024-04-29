@@ -1,23 +1,32 @@
 import streamlit as st
 import pandas as pd
-import datetime
 
-# Función para mostrar el calendario semanal
-def weekly_calendar():
-    today = datetime.date.today()
-    days_of_week = [(today + datetime.timedelta(days=i)).strftime('%A') for i in range(7)]
-
+def create_calendar():
     # Crear un DataFrame para representar el calendario
-    df = pd.DataFrame(index=range(8, 24), columns=days_of_week)
-
+    today = pd.Timestamp.today()
+    days_of_week = [(today + pd.Timedelta(days=i)).strftime('%A') for i in range(7)]
+    hours = [f'{hour}:00' for hour in range(8, 24)]
+    df = pd.DataFrame(index=hours, columns=days_of_week)
+    
     return df
 
-# Función principal de la aplicación
 def main():
     st.title('Calendario Semanal')
 
-    # Mostrar el calendario semanal
-    st.dataframe(weekly_calendar())
+    # Crear el calendario inicial
+    calendar = create_calendar()
 
-if __name__ == '__main__':
+    # Mostrar el calendario en una tabla
+    edited_calendar = st.table(calendar)
+
+    # Permitir la edición del calendario
+    for day in calendar.columns:
+        for hour in calendar.index:
+            key = f"{day}-{hour}"
+            calendar.loc[hour, day] = st.checkbox(label="", key=key)
+
+    # Actualizar la tabla con los cambios realizados
+    edited_calendar.table(calendar)
+
+if __name__ == "__main__":
     main()
